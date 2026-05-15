@@ -1,0 +1,961 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Financial Freedom Calculator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#0f172a;--panel:#1e293b;--panel2:#243244;--ink:#e2e8f0;--muted:#94a3b8;
+    --accent:#22c55e;--accent2:#16a34a;--warn:#f59e0b;--blue:#3b82f6;--row:#0b1220;--border:#334155;
+    --red:#ef4444;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-size:15px;line-height:1.4}
+  .wrap{max-width:1200px;margin:0 auto;padding:14px}
+  header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+  h1{font-size:18px;margin:0;font-weight:700;letter-spacing:.2px}
+  h1 .sub{display:block;font-size:11px;font-weight:400;color:var(--muted);margin-top:2px}
+  .lang{display:flex;gap:6px;align-items:center;font-size:13px}
+  .lang button{background:transparent;border:1px solid var(--border);color:var(--ink);padding:5px 9px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:5px;font-size:12px}
+  .lang button.active{background:var(--blue);border-color:var(--blue)}
+  .flag{width:18px;height:12px;border-radius:2px;display:inline-block;box-shadow:0 0 0 1px #00000040}
+
+  .tabs{display:flex;gap:6px;margin-bottom:12px;background:var(--panel);padding:4px;border-radius:10px}
+  .tabs button{flex:1;background:transparent;border:none;color:var(--muted);padding:10px;border-radius:7px;cursor:pointer;font-weight:600;font-size:14px}
+  .tabs button.active{background:var(--accent);color:#04140a}
+
+  .grid{display:grid;grid-template-columns:1fr;gap:12px}
+  @media (min-width:900px){.grid{grid-template-columns:320px 1fr}}
+
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px}
+  .panel h2{margin:0 0 10px;font-size:13px;color:var(--muted);font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+
+  .field{margin-bottom:10px}
+  .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+  .field .inputrow{display:flex;align-items:stretch;background:var(--panel2);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+  .field input{flex:1;background:transparent;border:none;color:var(--ink);padding:9px 10px;font-size:15px;font-variant-numeric:tabular-nums;width:100%;outline:none}
+  .field .suffix{display:flex;align-items:center;padding:0 10px;color:var(--muted);font-size:12px;background:#0d1626;border-left:1px solid var(--border)}
+  .hint{font-size:11px;color:var(--muted);margin-top:3px}
+  .locked{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--panel2);border:1px dashed var(--border);border-radius:8px;font-size:12px;color:var(--muted);ma[...]
+  .locked b{color:var(--ink)}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--accent);color:#04140a;border:none;padding:10px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-[...]
+  .btn:hover{background:var(--accent2)}
+  .btn.secondary{background:var(--blue);color:white}
+  .btn.secondary:hover{background:#2563eb}
+  .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--border)}
+  .btn.ghost:hover{background:var(--panel2)}
+
+  .summary{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:12px}
+  @media (max-width:900px){.summary{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:480px){.summary{grid-template-columns:1fr}}
+  .card{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:10px}
+  .card .k{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+  .card .v{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;word-break:break-word}
+  .card .d{font-size:11px;color:var(--accent);margin-top:2px}
+
+  .chartbox{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:12px}
+  .chartbox-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:8px}
+  .chartbox-head h3{margin:0;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+  .chartbox canvas{max-height:300px}
+  .chart-control{display:flex;justify-content:flex-end;margin-bottom:6px}
+  .chip{background:var(--blue);color:#fff;border:none;padding:4px 12px;border-radius:999px;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.3px}
+  .chip:hover{background:#2563eb}
+  .chip.off{background:var(--panel);border:1px solid var(--border);color:var(--muted)}
+
+  .credit{text-align:center;color:var(--muted);font-size:11px;margin-top:14px;letter-spacing:.5px;font-style:italic}
+  .credit b{color:var(--blue);font-style:normal;font-weight:700}
+  .byline{font-size:11px;color:var(--blue);font-weight:700;font-style:italic;margin-top:3px;letter-spacing:.3px}
+
+  .presets-section{margin-top:12px;padding-top:12px;border-top:1px dashed var(--border)}
+  .presets-head{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:8px}
+  .chips-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+  .rate-chip{background:var(--panel2);border:1px solid var(--border);color:var(--ink);padding:6px 10px;border-radius:999px;font-size:11.5px;cursor:pointer;font-weight:500;display:inline-flex;align-ite[...]
+  .rate-chip:hover{background:#2a3a52}
+  .rate-chip.active{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:700}
+  .rate-chip b{color:var(--accent);font-variant-numeric:tabular-nums;font-weight:700}
+  .rate-chip.active b{color:#bbf7d0}
+  .rate-chip.warn{border-color:var(--warn)}
+  .rate-chip.warn:hover{background:#3a2e1a}
+  .rate-chip.warn.active{background:var(--warn);border-color:var(--warn);color:#1a1206}
+  .rate-chip.warn.active b{color:#1a1206}
+
+  .preset-info{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:10px 30px 10px 10px;margin-bottom:8px;position:relative;font-size:12px}
+  .preset-info .info-name{font-weight:700;color:var(--blue);margin-bottom:5px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .preset-info .info-name .rate-tag{color:var(--accent);font-size:13px;font-variant-numeric:tabular-nums}
+  .preset-info .info-row{display:flex;justify-content:space-between;gap:8px;padding:2px 0;color:var(--muted)}
+  .preset-info .info-row b{color:var(--ink);font-weight:500;text-align:right;flex:1}
+  .info-close{position:absolute;top:6px;right:8px;background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px 7px;border-radius:4px;line-height:1}
+  .info-close:hover{background:var(--panel);color:var(--ink)}
+
+  .ext-link{display:inline-block;color:var(--blue);font-size:12px;text-decoration:none;margin-bottom:6px;font-weight:600}
+  .ext-link:hover{text-decoration:underline}
+  .disclaimer{font-size:10px;color:var(--muted);font-style:italic;line-height:1.5}
+
+  .tablewrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px}
+  table{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums;min-width:720px}
+  th,td{padding:6px 8px;text-align:right;border-bottom:1px solid var(--border);white-space:nowrap}
+  th{background:#0d1626;color:var(--muted);font-weight:600;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;position:sticky;top:0}
+  th:first-child,td:first-child{text-align:center;width:36px}
+  tbody tr:nth-child(even){background:rgba(255,255,255,.02)}
+  td.pos{color:var(--accent)}
+  td.neg{color:var(--red)}
+
+  footer{margin-top:14px;display:flex;gap:8px}
+  footer .btn{flex:1}
+
+  @media (max-width:900px) and (orientation:landscape){
+    .grid{grid-template-columns:280px 1fr}
+    .summary{grid-template-columns:repeat(5,1fr)}
+    h1{font-size:16px}
+    .chartbox canvas{max-height:220px}
+  }
+
+  /* === MOBILE PORTRAIT (≤600px) — card-list table & tighter layout === */
+  @media (max-width:600px){
+    .wrap{padding:10px}
+    h1{font-size:19px}
+    h1 .sub{font-size:11.5px;line-height:1.35}
+    h1 .byline{font-size:11.5px}
+    .panel{padding:12px}
+    .panel h2{font-size:12px;margin-bottom:8px}
+
+    /* Summary: 2-col, Required Capital spans full width */
+    .summary{grid-template-columns:repeat(2,1fr);gap:6px}
+    .summary .card:first-child{grid-column:1/-1}
+    .card{padding:9px 10px}
+    .card .k{font-size:10px}
+    .card .v{font-size:13.5px}
+
+    /* Card-list table: each <tr> becomes a stacked card */
+    .tablewrap{border:none;overflow:visible;background:transparent;border-radius:0}
+    .tablewrap table{display:block;min-width:0;width:100%}
+    .tablewrap thead{display:none}
+    .tablewrap tbody{display:block}
+    .tablewrap tr{
+      display:block;
+      background:var(--panel2);
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:0 0 6px;
+      margin-bottom:8px;
+    }
+    .tablewrap tr:nth-child(even){background:var(--panel2)}
+    .tablewrap td{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:6px 12px;
+      text-align:right;
+      border-bottom:1px dashed rgba(148,163,184,.14);
+      white-space:normal;
+      font-size:13px;
+      width:auto;
+    }
+    .tablewrap td:last-child{border-bottom:none}
+    .tablewrap td:before{
+      content:attr(data-label);
+      color:var(--muted);
+      font-size:10.5px;
+      text-transform:uppercase;
+      font-weight:600;
+      letter-spacing:.4px;
+      text-align:left;
+      margin-right:8px;
+      flex-shrink:0;
+    }
+    .tablewrap td:first-child{
+      background:linear-gradient(90deg,var(--blue),#2563eb);
+      color:#fff;
+      padding:7px 12px;
+      border-radius:9px 9px 0 0;
+      border:none;
+      margin-bottom:4px;
+      justify-content:center;
+      font-weight:800;
+      font-size:13px;
+      letter-spacing:.5px;
+      width:auto;
+    }
+    .tablewrap td:first-child:before{
+      color:#fff;
+      margin-right:6px;
+      font-size:12px;
+      letter-spacing:.5px;
+    }
+    .chartbox{padding:8px}
+    .chartbox canvas{max-height:260px}
+  }
+
+  /* Smallest phones */
+  @media (max-width:380px){
+    h1{font-size:17.5px}
+    .card .v{font-size:12.5px}
+    .tablewrap td{font-size:12.5px;padding:5px 10px}
+  }
+
+  /* Modal preview */
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:50;padding:14px}
+  .modal.show{display:flex}
+  .modal-inner{background:#fff;color:#0f172a;border-radius:12px;max-width:95vw;max-height:95vh;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+  .modal-inner img{max-width:100%;height:auto;border:1px solid #e2e8f0;border-radius:6px}
+  .modal-actions{display:flex;gap:8px;justify-content:flex-end}
+  .modal-actions .btn{width:auto;padding:8px 16px}
+
+  /* Offscreen report for JPEG export — portrait A4 */
+  #report{position:fixed;left:-9999px;top:0;width:794px;background:#ffffff;color:#0f172a;padding:28px;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  #report h1{font-size:20px;color:#0f172a;margin:0 0 2px}
+  #report .rsub{color:#64748b;font-size:11px;margin-bottom:14px}
+  #report .rsum{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:12px}
+  #report .rcard{background:#f1f5f9;border-radius:8px;padding:8px}
+  #report .rcard .k{font-size:8.5px;color:#64748b;text-transform:uppercase;margin-bottom:3px;letter-spacing:.5px}
+  #report .rcard .v{font-size:11px;font-weight:700;color:#0f172a;word-break:break-word}
+  #report .rchart{margin-bottom:12px;background:#f8fafc;border-radius:8px;padding:8px}
+  #report .rchart img{width:100%;height:auto}
+  #report table{width:100%;border-collapse:collapse;font-size:9.5px}
+  #report th,#report td{padding:5px 6px;border-bottom:1px solid #e2e8f0;text-align:right;color:#0f172a}
+  #report th{background:#0f172a;color:#fff;font-weight:600;font-size:9px;text-transform:uppercase;letter-spacing:.3px}
+  #report th:first-child,#report td:first-child{text-align:center}
+  #report .foot{margin-top:12px;font-size:9px;color:#94a3b8;text-align:center}
+  #report .mode-badge{display:inline-block;background:#22c55e;color:#04140a;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;margin-left:6px;vertical-align:middle}
+  #report .brand{color:#3b82f6;font-weight:800}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>
+      <span data-i18n="title">Financial Freedom Calculator</span>
+      <span class="sub" data-i18n="subtitle">FF (4% rule) vs FI (fully recompounding) — 20 tahun</span>
+      <span class="byline">Created by <span style="color:#fff">ARJ</span></span>
+    </h1>
+    <div class="lang">
+      <button id="lang-id" class="active" onclick="setLang('id')">
+        <svg class="flag" viewBox="0 0 6 4"><rect width="6" height="2" fill="#e70011"/><rect y="2" width="6" height="2" fill="#fff"/></svg>
+        ID
+      </button>
+      <button id="lang-en" onclick="setLang('en')">
+        <svg class="flag" viewBox="0 0 60 40"><rect width="60" height="40" fill="#012169"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#fff" stroke-width="6"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#[...]
+        EN
+      </button>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button id="tab-ff" class="active" onclick="setMode('ff')" data-i18n="mode_ff">Financial Freedom</button>
+    <button id="tab-fi" onclick="setMode('fi')" data-i18n="mode_fi">Fully Investment</button>
+  </div>
+
+  <div class="grid">
+    <section class="panel">
+      <h2 data-i18n="inputs">Input</h2>
+
+      <div id="ff-inputs">
+        <div class="field">
+          <label data-i18n="ff_monthly">Pendapatan Bulanan</label>
+          <div class="inputrow">
+            <input id="ff_monthly" type="number" value="5" min="0" step="0.5">
+            <span class="suffix" data-i18n="juta">Juta</span>
+          </div>
+          <div class="hint" data-i18n="ff_monthly_hint">Target pengeluaran bulanan dari passive income</div>
+        </div>
+        <div class="field">
+          <label data-i18n="rate">Investment Rate / annum</label>
+          <div class="inputrow">
+            <input id="ff_rate" type="number" value="7" min="0" step="0.1">
+            <span class="suffix">%</span>
+          </div>
+        </div>
+        <div class="locked">
+          <span data-i18n="swr_locked">Safe Withdrawal Rate (terkunci)</span>
+          <b>4%</b>
+        </div>
+      </div>
+
+      <div id="fi-inputs" style="display:none">
+        <div class="field">
+          <label data-i18n="fi_initial">Modal Awal</label>
+          <div class="inputrow">
+            <input id="fi_initial" type="number" value="1500" min="0" step="10">
+            <span class="suffix" data-i18n="juta">Juta</span>
+          </div>
+          <div class="hint" data-i18n="fi_initial_hint">Default = capital tahun ke-20 dari mode FF</div>
+        </div>
+        <div class="field">
+          <label data-i18n="rate">Investment Rate / annum</label>
+          <div class="inputrow">
+            <input id="fi_rate" type="number" value="7" min="0" step="0.1">
+            <span class="suffix">%</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn" onclick="calculate()" data-i18n="calculate">Hitung</button>
+
+      <div class="presets-section">
+        <div class="presets-head">📊 <span data-i18n="presets_label">Preset Rate (10-yr CAGR)</span></div>
+        <div class="chips-grid" id="chips-grid"></div>
+        <div class="preset-info" id="preset-info" style="display:none">
+          <button class="info-close" onclick="hidePresetInfo()" title="Tutup">✕</button>
+          <div id="preset-info-body"></div>
+        </div>
+        <a class="ext-link" href="https://app.bibit.id/" target="_blank" rel="noopener">
+          💡 <span data-i18n="preset_explore">Lihat produk di Bibit / Bareksa / Pluang ↗</span>
+        </a>
+        <div class="disclaimer" data-i18n="preset_disclaimer">Indikatif berdasarkan data publik 10-yr CAGR. Bukan jaminan return. Update terakhir: 15 Mei 2026.</div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2 data-i18n="results">Hasil</h2>
+      <div class="summary" id="summary"></div>
+
+      <div class="chart-control">
+        <button class="chip" id="chart-toggle" onclick="toggleChart()">📊 <span data-i18n="chart_hide">Sembunyikan</span></button>
+      </div>
+      <div class="chartbox" id="chartbox">
+        <div class="chartbox-head">
+          <h3 data-i18n="chart_title">Pertumbuhan Capital — FF vs FI overlay</h3>
+        </div>
+        <canvas id="chart"></canvas>
+      </div>
+
+      <div class="tablewrap">
+        <table id="result-table">
+          <thead id="thead"></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+
+      <footer>
+        <button class="btn secondary" onclick="openPreview()">
+          <span data-i18n="preview_share">👁️ Preview &amp; Bagikan JPEG</span>
+        </button>
+      </footer>
+    </section>
+  </div>
+
+  <div class="credit">Created by <b>ARJ</b></div>
+</div>
+
+<!-- Preview modal -->
+<div class="modal" id="modal">
+  <div class="modal-inner">
+    <div style="display:flex;justify-content:space-between;align-items:center"><b data-i18n="preview_modal_title">Preview JPEG (Portrait)</b><button class="btn ghost" style="width:auto;padding:6px 10p[...]
+    <img id="preview-img" alt="preview">
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closePreview()" data-i18n="cancel">Batal</button>
+      <button class="btn secondary" onclick="saveJPEG()" data-i18n="save_jpeg">💾 Simpan JPEG</button>
+    </div>
+  </div>
+</div>
+
+<!-- Offscreen report -->
+<div id="report"></div>
+
+<script>
+const I18N = {
+  id:{
+    title:"Financial Freedom Calculator",
+    subtitle:"FF (aturan 4%) vs FI (fully recompounding) — 20 tahun",
+    mode_ff:"Financial Freedom", mode_fi:"Fully Investment",
+    inputs:"Input", results:"Hasil",
+    ff_monthly:"Pendapatan Bulanan",
+    ff_monthly_hint:"Target pengeluaran bulanan dari passive income",
+    rate:"Tingkat Investasi / tahun",
+    swr_locked:"Safe Withdrawal Rate (terkunci)",
+    fi_initial:"Modal Awal",
+    fi_initial_hint:"Default = capital tahun ke-20 dari mode FF",
+    juta:"Juta",
+    calculate:"Hitung",
+    preview_share:"👁️ Preview & Bagikan JPEG",
+    preview_modal_title:"Preview JPEG (Portrait)",
+    cancel:"Batal",
+    save_jpeg:"💾 Simpan JPEG",
+    chart_title:"Pertumbuhan Capital — FF vs FI overlay",
+    sum_required:"Required Capital",
+    sum_y10:"Capital Tahun ke-10",
+    sum_y20:"Capital Tahun ke-20",
+    sum_monthly:"Monthly Income",
+    sum_annual:"Annual Income",
+    sum_initial:"Modal Awal",
+    sum_final:"Capital Akhir",
+    sum_total_return:"Total Return 20 Th",
+    th_year:"Thn",
+    th_capital:"Capital (M)",
+    th_growth:"Growth %",
+    th_return:"Return",
+    th_return_pct:"Return %",
+    th_income:"Income",
+    th_income_pct:"Income %",
+    th_reinvest:"Reinvest",
+    th_reinvest_pct:"Reinvest %",
+    chart_ff:"FF (dgn withdraw)",
+    chart_fi:"FI (no withdraw)",
+    chart_hide:"Sembunyikan",
+    chart_show:"Tampilkan",
+    hairline_100:"+100% (2× modal)",
+    hairline_200:"+200% (3× modal)",
+    report_generated:"Dibuat pada",
+    report_mode_ff:"Mode: Financial Freedom",
+    report_mode_fi:"Mode: Fully Investment",
+    report_credit:"Created by ARJ",
+    presets_label:"Preset Rate (10-yr CAGR)",
+    preset_explore:"Lihat produk di Bibit / Bareksa / Pluang ↗",
+    preset_disclaimer:"Indikatif berdasarkan data publik 10-yr CAGR. Bukan jaminan return. Update terakhir: 15 Mei 2026.",
+    preset_source:"Sumber",
+    preset_risk:"Risiko",
+    preset_liq:"Likuiditas"
+  },
+  en:{
+    title:"Financial Freedom Calculator",
+    subtitle:"FF (4% rule) vs FI (fully recompounding) — 20 years",
+    mode_ff:"Financial Freedom", mode_fi:"Fully Investment",
+    inputs:"Input", results:"Results",
+    ff_monthly:"Monthly Income",
+    ff_monthly_hint:"Target monthly spending from passive income",
+    rate:"Investment Rate / annum",
+    swr_locked:"Safe Withdrawal Rate (locked)",
+    fi_initial:"Initial Capital",
+    fi_initial_hint:"Default = year-20 capital from FF mode",
+    juta:"Million",
+    calculate:"Calculate",
+    preview_share:"👁️ Preview & Share JPEG",
+    preview_modal_title:"JPEG Preview (Portrait)",
+    cancel:"Cancel",
+    save_jpeg:"💾 Save JPEG",
+    chart_title:"Capital Growth — FF vs FI overlay",
+    sum_required:"Required Capital",
+    sum_y10:"Year-10 Capital",
+    sum_y20:"Year-20 Capital",
+    sum_monthly:"Monthly Income",
+    sum_annual:"Annual Income",
+    sum_initial:"Initial Capital",
+    sum_final:"Final Capital",
+    sum_total_return:"20-Yr Total Return",
+    th_year:"Yr",
+    th_capital:"Capital (B)",
+    th_growth:"Growth %",
+    th_return:"Return",
+    th_return_pct:"Return %",
+    th_income:"Income",
+    th_income_pct:"Income %",
+    th_reinvest:"Reinvest",
+    th_reinvest_pct:"Reinvest %",
+    chart_ff:"FF (with withdraw)",
+    chart_fi:"FI (no withdraw)",
+    chart_hide:"Hide",
+    chart_show:"Show",
+    hairline_100:"+100% (2× capital)",
+    hairline_200:"+200% (3× capital)",
+    report_generated:"Generated at",
+    report_mode_ff:"Mode: Financial Freedom",
+    report_mode_fi:"Mode: Fully Investment",
+    report_credit:"Created by ARJ",
+    presets_label:"Rate Presets (10-yr CAGR)",
+    preset_explore:"Explore products on Bibit / Bareksa / Pluang ↗",
+    preset_disclaimer:"Indicative based on public 10-yr CAGR data. Past performance ≠ future. Last updated: May 15, 2026.",
+    preset_source:"Source",
+    preset_risk:"Risk",
+    preset_liq:"Liquidity"
+  }
+};
+
+// Investment rate presets — indicative 10-yr CAGR, manually curated
+const PRESETS = [
+  {key:"deposito",   rate:4.0,  label:{id:"Deposito IDR",        en:"IDR Deposit"},
+    source:{id:"BI 7DRR avg 10-yr",                  en:"BI 7DRR 10-yr avg"},
+    risk:{id:"Sangat rendah",                         en:"Very low"},
+    liq:{id:"Tinggi (1-12 bln)",                      en:"High (1-12 mo)"}},
+  {key:"sbn",        rate:6.5,  label:{id:"SBN Ritel / ORI",      en:"Indo Govt Bonds"},
+    source:{id:"KemenKeu, avg coupon 10-yr",         en:"Ministry of Finance"},
+    risk:{id:"Rendah (gov't backed)",                 en:"Low (gov't backed)"},
+    liq:{id:"Terbatas (lock-in)",                     en:"Limited (lock-in)"}},
+  {key:"rd_tetap",   rate:7.0,  label:{id:"RD Pendapatan Tetap",  en:"Fixed Income Fund"},
+    source:{id:"Bibit/Bareksa median 10-yr",         en:"Bibit/Bareksa median 10-yr"},
+    risk:{id:"Rendah-Sedang",                         en:"Low-Medium"},
+    liq:{id:"T+2 hari",                               en:"T+2 days"}},
+  {key:"rd_campuran",rate:9.0,  label:{id:"RD Campuran",          en:"Balanced Fund"},
+    source:{id:"Bibit median 10-yr",                 en:"Bibit median 10-yr"},
+    risk:{id:"Sedang",                                en:"Medium"},
+    liq:{id:"T+2 hari",                               en:"T+2 days"}},
+  {key:"ihsg",       rate:7.5,  label:{id:"IHSG (LQ45)",          en:"IDX LQ45"},
+    source:{id:"IDX 10-yr incl. dividen",            en:"IDX 10-yr incl. dividend"},
+    risk:{id:"Sedang-Tinggi",                         en:"Medium-High"},
+    liq:{id:"T+2 hari",                               en:"T+2 days"}},
+  {key:"rd_saham",   rate:10.0, label:{id:"RD Saham Indonesia",   en:"Indo Equity Fund"},
+    source:{id:"Top quartile RD Saham 10-yr",        en:"Top quartile equity fund 10-yr"},
+    risk:{id:"Tinggi",                                en:"High"},
+    liq:{id:"T+2 hari",                               en:"T+2 days"}},
+  {key:"emas",       rate:9.0,  label:{id:"Emas (LBMA, IDR)",     en:"Gold (LBMA, IDR)"},
+    source:{id:"LBMA spot + USD/IDR 10-yr",          en:"LBMA spot + USD/IDR 10-yr"},
+    risk:{id:"Sedang",                                en:"Medium"},
+    liq:{id:"Tinggi",                                 en:"High"}},
+  {key:"properti",   rate:6.0,  label:{id:"Properti Residensial", en:"Residential Property"},
+    source:{id:"BI RPPI 10-yr",                      en:"BI Residential Property Index 10-yr"},
+    risk:{id:"Sedang (illiq risk)",                   en:"Medium (illiq risk)"},
+    liq:{id:"Sangat rendah",                          en:"Very low"}},
+  {key:"sp500",      rate:11.0, label:{id:"S&P 500 (USD)",        en:"S&P 500 (USD)"},
+    source:{id:"Historical 10-yr incl. dividen",     en:"Historical 10-yr incl. dividend"},
+    risk:{id:"Sedang-Tinggi",                         en:"Medium-High"},
+    liq:{id:"Tinggi",                                 en:"High"}},
+  {key:"nasdaq",     rate:15.0, label:{id:"Nasdaq 100 (USD)",     en:"Nasdaq 100 (USD)"},
+    source:{id:"Historical 10-yr incl. dividen",     en:"Historical 10-yr incl. dividend"},
+    risk:{id:"Tinggi (tech-concentrated)",            en:"High (tech-concentrated)"},
+    liq:{id:"Tinggi",                                 en:"High"}},
+  {key:"btc",        rate:35.0, label:{id:"Bitcoin ⚠️",          en:"Bitcoin ⚠️"},
+    source:{id:"10-yr CAGR, drawdown bisa >70%",     en:"10-yr CAGR, drawdown can exceed 70%"},
+    risk:{id:"Sangat Tinggi ⚠️",                     en:"Very High ⚠️"},
+    liq:{id:"Tinggi",                                 en:"High"}, warn:true}
+];
+
+const SWR = 0.04;        // locked
+const YEARS = 20;
+
+let lang = "id";
+let mode = "ff";
+let lastFFRequiredCapital = null;   // B0 from FF — used as default for FI
+let chartInstance = null;
+let lastResult = null;
+let chartVisible = true;
+let activePreset = null;
+
+function renderPresets(){
+  const grid = document.getElementById("chips-grid");
+  if(!grid) return;
+  grid.innerHTML = PRESETS.map(p=>`
+    <button type="button" class="rate-chip ${p.warn?'warn':''} ${activePreset===p.key?'active':''}" onclick="onPresetClick('${p.key}')">
+      ${p.label[lang]||p.label.id} <b>${p.rate.toFixed(1)}%</b>
+    </button>`).join("");
+}
+function onPresetClick(key){
+  const p = PRESETS.find(x=>x.key===key);
+  if(!p) return;
+  if(activePreset === key){ hidePresetInfo(); return; }
+  activePreset = key;
+  const rateInput = (mode==="ff") ? document.getElementById("ff_rate") : document.getElementById("fi_rate");
+  rateInput.value = p.rate;
+  showPresetInfo(p);
+  calculate();
+  renderPresets();
+}
+function showPresetInfo(p){
+  const box = document.getElementById("preset-info");
+  const body = document.getElementById("preset-info-body");
+  body.innerHTML = `
+    <div class="info-name"><span>${p.label[lang]||p.label.id}</span><span class="rate-tag">${p.rate.toFixed(1)}%</span></div>
+    <div class="info-row"><span>${t("preset_source")}</span><b>${p.source[lang]||p.source.id}</b></div>
+    <div class="info-row"><span>${t("preset_risk")}</span><b>${p.risk[lang]||p.risk.id}</b></div>
+    <div class="info-row"><span>${t("preset_liq")}</span><b>${p.liq[lang]||p.liq.id}</b></div>
+  `;
+  box.style.display = "block";
+}
+function hidePresetInfo(){
+  document.getElementById("preset-info").style.display = "none";
+  activePreset = null;
+  renderPresets();
+}
+
+function t(k){return (I18N[lang]||I18N.id)[k]||k}
+
+function setLang(l){
+  lang = l;
+  document.documentElement.lang = l;
+  document.getElementById("lang-id").classList.toggle("active", l==="id");
+  document.getElementById("lang-en").classList.toggle("active", l==="en");
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    el.textContent = t(el.getAttribute("data-i18n"));
+  });
+  renderPresets();
+  if(activePreset){
+    const p = PRESETS.find(x=>x.key===activePreset);
+    if(p) showPresetInfo(p);
+  }
+  calculate();
+}
+
+function setMode(m){
+  mode = m;
+  document.getElementById("tab-ff").classList.toggle("active", m==="ff");
+  document.getElementById("tab-fi").classList.toggle("active", m==="fi");
+  document.getElementById("ff-inputs").style.display = (m==="ff")?"block":"none";
+  document.getElementById("fi-inputs").style.display = (m==="fi")?"block":"none";
+  if(m==="fi" && lastFFRequiredCapital!==null){
+    document.getElementById("fi_initial").value = (Math.round(lastFFRequiredCapital*1000)/1000).toFixed(3);
+  }
+  calculate();
+}
+
+function toggleChart(){
+  chartVisible = !chartVisible;
+  document.getElementById("chartbox").style.display = chartVisible ? "block" : "none";
+  const btn = document.getElementById("chart-toggle");
+  btn.classList.toggle("off", !chartVisible);
+  const key = chartVisible ? "chart_hide" : "chart_show";
+  btn.innerHTML = `📊 <span data-i18n="${key}">${t(key)}</span>`;
+}
+
+// Formatting helpers — values are in juta (millions of rupiah)
+function loc(){return (lang==="id")?"id-ID":"en-US"}
+function fmtRp(jutaVal){
+  return "Rp " + new Intl.NumberFormat(loc(),{maximumFractionDigits:0}).format(jutaVal*1_000_000);
+}
+function fmtCap(jutaVal){
+  // Capital displayed in Milyar (B = billion) with 3 decimals
+  return new Intl.NumberFormat(loc(),{minimumFractionDigits:3,maximumFractionDigits:3}).format(jutaVal/1000);
+}
+function fmtAmt(jutaVal){
+  // Return / Income / Reinvest in juta with 2 decimals
+  return new Intl.NumberFormat(loc(),{minimumFractionDigits:2,maximumFractionDigits:2}).format(jutaVal);
+}
+function fmtPct(x,dec=2){
+  return new Intl.NumberFormat(loc(),{minimumFractionDigits:dec,maximumFractionDigits:dec}).format(x*100) + "%";
+}
+
+function calcFF(monthlyJuta, ratePct){
+  const r = ratePct/100;
+  const annualExp = monthlyJuta*12;
+  const B0 = annualExp / SWR;
+  const rows = [];
+  let B = B0;
+  for(let y=1;y<=YEARS;y++){
+    const E = B*r;
+    const G = annualExp;
+    const I = E - G;
+    rows.push({
+      year:y, capital:B,
+      growth:(B-B0)/B0,
+      ret:E, retPct:r,
+      inc:G, incPct:G/B,
+      reinv:I, reinvPct:I/B
+    });
+    B = B + I;
+  }
+  return {B0, annualExp, monthlyExp:monthlyJuta, rows};
+}
+
+function calcFI(initialJuta, ratePct){
+  const r = ratePct/100;
+  const rows = [];
+  let B = initialJuta;
+  for(let y=1;y<=YEARS;y++){
+    const E = B*r;
+    rows.push({
+      year:y, capital:B,
+      growth:(B-initialJuta)/initialJuta,
+      ret:E, retPct:r
+    });
+    B = B + E;
+  }
+  return {B0:initialJuta, rows};
+}
+
+function calculate(){
+  const tbody = document.getElementById("tbody");
+  const thead = document.getElementById("thead");
+  const sum = document.getElementById("summary");
+
+  if(mode==="ff"){
+    const m = parseFloat(document.getElementById("ff_monthly").value)||0;
+    const r = parseFloat(document.getElementById("ff_rate").value)||0;
+    const res = calcFF(m,r);
+    lastFFRequiredCapital = res.B0;
+    lastResult = {mode:"ff", res, rate:r, monthly:m};
+
+    thead.innerHTML = `<tr>
+      <th>${t("th_year")}</th>
+      <th>${t("th_capital")}</th>
+      <th>${t("th_growth")}</th>
+      <th>${t("th_return")}</th>
+      <th>${t("th_return_pct")}</th>
+      <th>${t("th_income")}</th>
+      <th>${t("th_income_pct")}</th>
+      <th>${t("th_reinvest")}</th>
+      <th>${t("th_reinvest_pct")}</th>
+    </tr>`;
+    tbody.innerHTML = res.rows.map(r=>`<tr>
+      <td data-label="${t('th_year')}">${r.year}</td>
+      <td data-label="${t('th_capital')}">${fmtCap(r.capital)}</td>
+      <td data-label="${t('th_growth')}" class="pos">${fmtPct(r.growth)}</td>
+      <td data-label="${t('th_return')}">${fmtAmt(r.ret)}</td>
+      <td data-label="${t('th_return_pct')}">${fmtPct(r.retPct)}</td>
+      <td data-label="${t('th_income')}">${fmtAmt(r.inc)}</td>
+      <td data-label="${t('th_income_pct')}" class="neg">${fmtPct(r.incPct)}</td>
+      <td data-label="${t('th_reinvest')}" class="pos">${fmtAmt(r.reinv)}</td>
+      <td data-label="${t('th_reinvest_pct')}" class="pos">${fmtPct(r.reinvPct)}</td>
+    </tr>`).join("");
+
+    const y10 = res.rows[9], y20 = res.rows[YEARS-1];
+    sum.innerHTML = `
+      <div class="card"><div class="k">${t("sum_required")}</div><div class="v">${fmtRp(res.B0)}</div></div>
+      <div class="card"><div class="k">${t("sum_y10")}</div><div class="v">${fmtRp(y10.capital)}</div><div class="d">+${fmtPct(y10.growth,1)}</div></div>
+      <div class="card"><div class="k">${t("sum_y20")}</div><div class="v">${fmtRp(y20.capital)}</div><div class="d">+${fmtPct(y20.growth,1)}</div></div>
+      <div class="card"><div class="k">${t("sum_monthly")}</div><div class="v">${fmtRp(res.monthlyExp)}</div></div>
+      <div class="card"><div class="k">${t("sum_annual")}</div><div class="v">${fmtRp(res.annualExp)}</div></div>
+    `;
+  } else {
+    const init = parseFloat(document.getElementById("fi_initial").value)||0;
+    const r = parseFloat(document.getElementById("fi_rate").value)||0;
+    const res = calcFI(init,r);
+    lastResult = {mode:"fi", res, rate:r, initial:init};
+
+    thead.innerHTML = `<tr>
+      <th>${t("th_year")}</th>
+      <th>${t("th_capital")}</th>
+      <th>${t("th_growth")}</th>
+      <th>${t("th_return")}</th>
+      <th>${t("th_return_pct")}</th>
+    </tr>`;
+    tbody.innerHTML = res.rows.map(r=>`<tr>
+      <td data-label="${t('th_year')}">${r.year}</td>
+      <td data-label="${t('th_capital')}">${fmtCap(r.capital)}</td>
+      <td data-label="${t('th_growth')}" class="pos">${fmtPct(r.growth)}</td>
+      <td data-label="${t('th_return')}">${fmtAmt(r.ret)}</td>
+      <td data-label="${t('th_return_pct')}">${fmtPct(r.retPct)}</td>
+    </tr>`).join("");
+
+    const y10 = res.rows[9], y20 = res.rows[YEARS-1];
+    const finalCap = y20.capital + y20.ret;
+    sum.innerHTML = `
+      <div class="card"><div class="k">${t("sum_initial")}</div><div class="v">${fmtRp(init)}</div></div>
+      <div class="card"><div class="k">${t("sum_y10")}</div><div class="v">${fmtRp(y10.capital)}</div><div class="d">+${fmtPct(y10.growth,1)}</div></div>
+      <div class="card"><div class="k">${t("sum_y20")}</div><div class="v">${fmtRp(y20.capital)}</div><div class="d">+${fmtPct(y20.growth,1)}</div></div>
+      <div class="card"><div class="k">${t("sum_final")}</div><div class="v">${fmtRp(finalCap)}</div></div>
+      <div class="card"><div class="k">${t("sum_total_return")}</div><div class="v">${fmtRp(finalCap-init)}</div></div>
+    `;
+  }
+  drawChart();
+}
+
+// Hairline plugin: horizontal dashed lines at +100% (2×B0) and +200% (3×B0).
+// Line is TRUNCATED at the rightmost crossing point across all datasets;
+// if ANY dataset never crosses, line extends full width (target masih ada).
+const hairlinePlugin = {
+  id:"hairlines",
+  afterDatasetsDraw(chart){
+    const b0 = chart.$b0Milyar;
+    if(!b0) return;
+    const ctx = chart.ctx;
+    const {chartArea, scales} = chart;
+    const yScale = scales.y;
+    const lines = [
+      {y:2*b0, label:t("hairline_100"), color:"#f59e0b"},
+      {y:3*b0, label:t("hairline_200"), color:"#ef4444"}
+    ];
+    lines.forEach(line=>{
+      const yPx = yScale.getPixelForValue(line.y);
+      if(yPx < chartArea.top || yPx > chartArea.bottom) return;
+
+      // Pass 1: collect crossings, determine truncation point
+      let allCross = true;
+      let rightmostXPx = chartArea.left;
+      const crossings = []; // {xPx, year, color}
+      chart.data.datasets.forEach((ds, dsIdx)=>{
+        const data = ds.data;
+        const meta = chart.getDatasetMeta(dsIdx);
+        let crossed = false;
+        // If first point already >= threshold, treat as crossed at point 0
+        if(data[0]!=null && data[0] >= line.y){
+          crossings.push({xPx:meta.data[0].x, year:1, color:ds.borderColor});
+          if(meta.data[0].x > rightmostXPx) rightmostXPx = meta.data[0].x;
+          crossed = true;
+        } else {
+          for(let i=1;i<data.length;i++){
+            const prev = data[i-1], curr = data[i];
+            if(prev==null || curr==null) continue;
+            if(prev < line.y && curr >= line.y){
+              const ratio = (line.y - prev) / (curr - prev);
+              const prevPx = meta.data[i-1].x;
+              const currPx = meta.data[i].x;
+              const xPx = prevPx + (currPx - prevPx) * ratio;
+              const yearLabel = i + ratio;
+              crossings.push({xPx, year:yearLabel, color:ds.borderColor});
+              if(xPx > rightmostXPx) rightmostXPx = xPx;
+              crossed = true;
+              break;
+            }
+          }
+        }
+        if(!crossed) allCross = false;
+      });
+
+      const endX = allCross ? rightmostXPx : chartArea.right;
+      if(endX <= chartArea.left + 1) return; // nothing to draw
+
+      // Draw truncated dashed line
+      ctx.save();
+      ctx.strokeStyle = line.color;
+      ctx.setLineDash([5,4]);
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(chartArea.left, yPx);
+      ctx.lineTo(endX, yPx);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Label badge — placed at end of line (right of truncation), shifted inward if it overflows
+      ctx.font = "bold 10px system-ui";
+      const txt = line.label;
+      const lw = ctx.measureText(txt).width + 10;
+      let labelX = endX + 4;
+      if(labelX + lw > chartArea.right) labelX = Math.max(chartArea.left, chartArea.right - lw);
+      ctx.fillStyle = line.color;
+      ctx.fillRect(labelX, yPx - 7, lw, 14);
+      ctx.fillStyle = "#0f172a";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
+      ctx.fillText(txt, labelX + 5, yPx);
+      ctx.restore();
+
+      // Crossing markers (per dataset) + vertical drop line to X-axis
+      crossings.forEach(c=>{
+        // vertical dashed drop-line from marker down to x-axis
+        ctx.save();
+        ctx.strokeStyle = c.color;
+        ctx.setLineDash([4,3]);
+        ctx.lineWidth = 1.2;
+        ctx.globalAlpha = 0.85;
+        ctx.beginPath();
+        ctx.moveTo(c.xPx, yPx);
+        ctx.lineTo(c.xPx, chartArea.bottom);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.globalAlpha = 1;
+        // small tick on x-axis
+        ctx.strokeStyle = c.color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(c.xPx, chartArea.bottom);
+        ctx.lineTo(c.xPx, chartArea.bottom + 5);
+        ctx.stroke();
+        ctx.restore();
+        // marker dot at crossing
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(c.xPx, yPx, 5, 0, Math.PI*2);
+        ctx.fillStyle = c.color;
+        ctx.fill();
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 1.8;
+        ctx.stroke();
+        const tag = "Y"+c.year.toFixed(1);
+        ctx.font = "bold 10px system-ui";
+        const tw = ctx.measureText(tag).width + 8;
+        ctx.fillStyle = c.color;
+        ctx.fillRect(c.xPx - tw/2, yPx - 24, tw, 14);
+        ctx.fillStyle = "#0f172a";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(tag, c.xPx, yPx - 17);
+        ctx.restore();
+      });
+    });
+  }
+};
+
+function drawChart(){
+  const ctx = document.getElementById("chart");
+  if(chartInstance){chartInstance.destroy();chartInstance=null}
+  if(!lastResult) return;
+
+  const labels = Array.from({length:YEARS},(_,i)=>String(i+1));
+  let datasets = [];
+  let b0Milyar = 0;
+
+  if(lastResult.mode==="ff"){
+    const ffCap = lastResult.res.rows.map(r=>r.capital/1000);
+    const r = lastResult.rate/100;
+    const B0 = lastResult.res.B0;
+    b0Milyar = B0/1000;
+    const fiCap = [];
+    let b = B0;
+    for(let y=1;y<=YEARS;y++){fiCap.push(b/1000); b = b*(1+r)}
+    datasets = [
+      {label:t("chart_ff"),data:ffCap,borderColor:"#22c55e",backgroundColor:"rgba(34,197,94,.15)",tension:.3,fill:false,borderWidth:2.5,pointRadius:3},
+      {label:t("chart_fi"),data:fiCap,borderColor:"#3b82f6",backgroundColor:"rgba(59,130,246,.15)",tension:.3,fill:false,borderWidth:2.5,borderDash:[6,4],pointRadius:3}
+    ];
+  } else {
+    const fiCap = lastResult.res.rows.map(r=>r.capital/1000);
+    b0Milyar = lastResult.initial/1000;
+    datasets = [{label:t("chart_fi"),data:fiCap,borderColor:"#3b82f6",backgroundColor:"rgba(59,130,246,.15)",tension:.3,fill:true,borderWidth:2.5,pointRadius:3}];
+  }
+
+  chartInstance = new Chart(ctx,{
+    type:"line",
+    data:{labels,datasets},
+    plugins:[hairlinePlugin],
+    options:{
+      responsive:true,maintainAspectRatio:false,animation:{duration:400},
+      plugins:{
+        legend:{labels:{color:"#cbd5e1",font:{size:11},boxWidth:14}},
+        tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${new Intl.NumberFormat(loc(),{minimumFractionDigits:3,maximumFractionDigits:3}).format(c.parsed.y)} M`}}
+      },
+      scales:{
+        x:{ticks:{color:"#94a3b8"},grid:{color:"rgba(148,163,184,.1)"},title:{display:true,text:lang==="id"?"Tahun":"Year",color:"#94a3b8"}},
+        y:{ticks:{color:"#94a3b8",callback:v=>new Intl.NumberFormat(loc(),{maximumFractionDigits:1}).format(v)+" M"},grid:{color:"rgba(148,163,184,.1)"},title:{display:true,text:lang==="id"?"Capital ([...]
+      }
+    }
+  });
+  chartInstance.$b0Milyar = b0Milyar;
+  chartInstance.update();
+}
+
+async function buildReport(){
+  const now = new Date();
+  const dt = now.toLocaleString(loc(),{year:"numeric",month:"long",day:"2-digit",hour:"2-digit",minute:"2-digit"});
+
+  // Capture chart as image for embedding
+  const chartImg = chartInstance ? chartInstance.toBase64Image("image/png",1) : "";
+
+  let html = `<h1>${t("title")} <span class="mode-badge">${mode==="ff"?"FF":"FI"}</span></h1>`;
+  html += `<div class="rsub">${t(mode==="ff"?"report_mode_ff":"report_mode_fi")} • ${t("rate")}: ${document.getElementById(mode==="ff"?"ff_rate":"fi_rate").value}% ${mode==="ff"?"• SWR: 4%":""} ••[...]
+
+  html += `<div class="rsum">`;
+  document.querySelectorAll("#summary .card").forEach(c=>{
+    html += `<div class="rcard"><div class="k">${c.querySelector(".k").textContent}</div><div class="v">${c.querySelector(".v").textContent}</div></div>`;
+  });
+  html += `</div>`;
+
+  if(chartImg){html += `<div class="rchart"><img src="${chartImg}" alt="chart"></div>`}
+
+  html += `<table><thead>${document.getElementById("thead").innerHTML}</thead><tbody>${document.getElementById("tbody").innerHTML}</tbody></table>`;
+  html += `<div class="foot">${t("report_generated")} ${dt} • Financial Freedom Calculator • <span class="brand">Created by ARJ</span></div>`;
+  document.getElementById("report").innerHTML = html;
+}
+
+let lastBlobUrl = null;
+async function openPreview(){
+  await buildReport();
+  const node = document.getElementById("report");
+  const canvas = await html2canvas(node,{backgroundColor:"#ffffff",scale:2});
+  const dataUrl = canvas.toDataURL("image/jpeg",0.92);
+  document.getElementById("preview-img").src = dataUrl;
+  lastBlobUrl = dataUrl;
+  document.getElementById("modal").classList.add("show");
+}
+function closePreview(){document.getElementById("modal").classList.remove("show")}
+function saveJPEG(){
+  if(!lastBlobUrl) return;
+  const a = document.createElement("a");
+  a.download = `arj-financial-freedom-${mode}-${Date.now()}.jpg`;
+  a.href = lastBlobUrl;
+  a.click();
+  closePreview();
+}
+
+// auto-recalc on input change
+["ff_monthly","ff_rate","fi_initial","fi_rate"].forEach(id=>{
+  document.getElementById(id).addEventListener("input",calculate);
+});
+
+// init
+renderPresets();
+setLang("id");
+setMode("ff");
+calculate();
+</script>
+</body>
+</html>
